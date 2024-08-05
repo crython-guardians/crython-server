@@ -1,2 +1,4 @@
-package crypton.CryptoGuardians.domain.document.api;public class DocumentController {
+package crypton.CryptoGuardians.domain.document.api;
+
+public class DocumentController {
 }
