@@ -1,8 +1,12 @@
 package crypton.CryptoGuardians.domain.document.service;
 
+import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
 import crypton.CryptoGuardians.domain.document.entity.Document;
+import crypton.CryptoGuardians.domain.document.entity.DocumentKey;
+import crypton.CryptoGuardians.domain.document.repository.DocumentKeyRepository;
 import crypton.CryptoGuardians.domain.document.repository.DocumentRepository;
+import crypton.CryptoGuardians.global.error.exception.Exception404;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +24,7 @@ import java.text.DecimalFormat;
 public class DocumentServiceImpl implements DocumentService{
 
     private final DocumentRepository documentRepository;
+    private final DocumentKeyRepository documentKeyRepository;
     private final Path root = Paths.get("uploads");
 
     @Override
@@ -71,4 +76,10 @@ public class DocumentServiceImpl implements DocumentService{
         return df.format(adjustedSize) + " " + units[unitIndex];
     }
 
+    @Override
+    public AuthorizeResponseDTO getAuthorizeKey(Long documentId) {
+        DocumentKey documentKey = documentKeyRepository.findByDocumentId(documentId).orElseThrow(() -> new Exception404("파일 인증 키를 찾을 수 없습니다."));
+        String key = documentKey.getKey();
+        return new AuthorizeResponseDTO(key);
+    }
 }
