@@ -3,11 +3,14 @@ package crypton.CryptoGuardians.domain.document.service;
 import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
+import crypton.CryptoGuardians.domain.document.dto.ViewLogRequestDTO;
 import crypton.CryptoGuardians.domain.document.entity.Document;
 import crypton.CryptoGuardians.domain.document.entity.DocumentKey;
+import crypton.CryptoGuardians.domain.document.entity.DocumentView;
 import crypton.CryptoGuardians.domain.document.entity.User;
 import crypton.CryptoGuardians.domain.document.repository.DocumentKeyRepository;
 import crypton.CryptoGuardians.domain.document.repository.DocumentRepository;
+import crypton.CryptoGuardians.domain.document.repository.DocumentViewRepository;
 import crypton.CryptoGuardians.domain.document.repository.UserRepository;
 import crypton.CryptoGuardians.global.error.exception.Exception404;
 import crypton.CryptoGuardians.global.error.exception.Exception500;
@@ -28,11 +31,12 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class DocumentServiceImpl implements DocumentService{
+public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRepository documentRepository;
     private final UserRepository userRepository;
     private final DocumentKeyRepository documentKeyRepository;
+    private final DocumentViewRepository documentViewRepository;
     private final Path root = Paths.get("uploads");
 
     @Override
@@ -66,13 +70,6 @@ public class DocumentServiceImpl implements DocumentService{
         } catch (IOException e) {
             throw new Exception500("파일 업로드에 실패했습니다.");
         }
-    }
-
-    @Override
-    public AuthorizeResponseDTO getAuthorizeKey(Long documentId) {
-        DocumentKey documentKey = documentKeyRepository.findByDocumentId(documentId).orElseThrow(() -> new Exception404("파일 인증 키를 찾을 수 없습니다."));
-        String key = documentKey.getAuthKey();
-        return new AuthorizeResponseDTO(key);
     }
 
     @Override
@@ -116,11 +113,30 @@ public class DocumentServiceImpl implements DocumentService{
         return documentRepository.findById(documentId).orElseThrow(() -> new Exception404("파일을 찾을 수 없습니다."));
     }
 
+    @Override
+    public AuthorizeResponseDTO getAuthorizeKey(Long documentId) {
+        DocumentKey documentKey = documentKeyRepository.findByDocumentId(documentId).orElseThrow(() -> new Exception404("파일 인증 키를 찾을 수 없습니다."));
+        String key = documentKey.getAuthKey();
+        return new AuthorizeResponseDTO(key);
+    }
+
+    @Override
+    public void saveViewLog(Long documentId, ViewLogRequestDTO viewLogRequestDTO) {
+        Document document = documentRepository.findById(documentId).orElseThrow(() -> new Exception404("파일을 찾을 수 없습니다."));
+        User viewer = userRepository.findById(viewLogRequestDTO.viewerId()).orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다."));
+
+        document.fileRead();
+        documentRepository.save(document);
+
+        DocumentView documentView = DocumentView.createDocumentView(document, viewer, viewLogRequestDTO.timestamp());
+        documentViewRepository.save(documentView);
+    }
+
     private String formatFileSize(long size) {
         if (size <= 0) return "0 KB";
         if (size < 1024) return "1 KB";
 
-        final String[] units = new String[] { "KB", "MB" };
+        final String[] units = new String[]{"KB", "MB"};
         int unitIndex = 0;
         double adjustedSize = size;
 
