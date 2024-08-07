@@ -32,7 +32,11 @@ public class Document {
 
     // 문서 탈취 여부
     @Column
-    private boolean fileTheft;
+    private int fileTheftCount;
+
+    @Column
+    // 키가 바뀌었는지 여부
+    private boolean updateAuthKey;
 
     @Column
     private int fileReadCount;
@@ -41,15 +45,19 @@ public class Document {
     @CreationTimestamp
     private Timestamp createdAt;
 
-    public Document(String fileName, String fileSize, String uploadUser, String filePath, boolean fileTheft){
+    public Document(String fileName, String fileSize, String uploadUser, String filePath, boolean updateAuthKey){
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.uploadUser = uploadUser;
         this.filePath = filePath;
-        this.fileTheft = fileTheft;
+        this.updateAuthKey = updateAuthKey;
     }
 
     public void fileRead() {
         this.fileReadCount++;
+    }
+
+    public void fileTheft() {
+        this.fileTheftCount++;
     }
 }
