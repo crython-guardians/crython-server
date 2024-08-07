@@ -80,7 +80,7 @@ public class DocumentServiceImpl implements DocumentService{
     @Override
     public AuthorizeResponseDTO getAuthorizeKey(Long documentId) {
         DocumentKey documentKey = documentKeyRepository.findByDocumentId(documentId).orElseThrow(() -> new Exception404("파일 인증 키를 찾을 수 없습니다."));
-        String key = documentKey.getKey();
+        String key = documentKey.getAuthKey();
         return new AuthorizeResponseDTO(key);
     }
 }
