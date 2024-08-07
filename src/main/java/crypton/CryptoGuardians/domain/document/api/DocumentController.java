@@ -1,7 +1,7 @@
 package crypton.CryptoGuardians.domain.document.api;
 
 
-import crypton.CryptoGuardians.domain.document.dto.DocRequestDTO;
+import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
 import crypton.CryptoGuardians.domain.document.service.DocumentService;
 import crypton.CryptoGuardians.global.util.ResponseUtil;
 import crypton.CryptoGuardians.global.util.ResponseUtil.ResponseDto;
@@ -21,9 +21,9 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @PostMapping("/upload")
-    public ResponseDto<String> uploadFile(@ModelAttribute DocRequestDTO docRequestDTO){
+    public ResponseDto<String> uploadFile(@ModelAttribute UploadRequestDTO uploadRequestDTO){
         try {
-            documentService.saveFile(docRequestDTO);
+            documentService.saveFile(uploadRequestDTO);
             return ResponseUtil.success("File uploaded successfully", null);
         } catch (IOException e) {
             return ResponseUtil.error(e.getMessage(), null);
