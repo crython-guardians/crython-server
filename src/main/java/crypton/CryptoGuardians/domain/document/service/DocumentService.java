@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public interface DocumentService {
 
-    void saveFile(UploadRequestDTO uploadRequestDTO) throws IOException;
+    void saveFile(UploadRequestDTO uploadRequestDTO);
 
     AuthorizeResponseDTO getAuthorizeKey(Long documentId);
 }
