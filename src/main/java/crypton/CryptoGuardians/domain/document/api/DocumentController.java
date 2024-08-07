@@ -13,9 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.io.IOException;
-
 @RestController
 @RequiredArgsConstructor
 @Validated
@@ -25,13 +22,9 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @PostMapping("/upload")
-    public ResponseDto<String> uploadFile(@ModelAttribute UploadRequestDTO uploadRequestDTO){
-        try {
+    public ResponseEntity<ResponseDto<String>> uploadFile(@ModelAttribute UploadRequestDTO uploadRequestDTO){
             documentService.saveFile(uploadRequestDTO);
-            return ResponseUtil.success("File uploaded successfully", null);
-        } catch (IOException e) {
-            return ResponseUtil.error(e.getMessage(), null);
-        }
+            return new ResponseEntity<>(ResponseUtil.success("파일 업로드 성공", null), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/authorize")

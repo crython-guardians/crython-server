@@ -7,6 +7,7 @@ import crypton.CryptoGuardians.domain.document.entity.DocumentKey;
 import crypton.CryptoGuardians.domain.document.repository.DocumentKeyRepository;
 import crypton.CryptoGuardians.domain.document.repository.DocumentRepository;
 import crypton.CryptoGuardians.global.error.exception.Exception404;
+import crypton.CryptoGuardians.global.error.exception.Exception500;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -28,11 +30,15 @@ public class DocumentServiceImpl implements DocumentService{
     private final Path root = Paths.get("uploads");
 
     @Override
-    public void saveFile(UploadRequestDTO uploadRequestDTO) throws IOException {
+    public void saveFile(UploadRequestDTO uploadRequestDTO) {
         MultipartFile file = uploadRequestDTO.file();
         String uploadUser = uploadRequestDTO.uploadUser();
-        String fileName = file.getOriginalFilename();
-        Path filePath = root.resolve(fileName);
+        String originalFilename = file.getOriginalFilename();
+
+        // 파일명 앞에 UUID 추가
+        String uuid = UUID.randomUUID().toString();
+        String newFilename = uuid + "_" + originalFilename;
+        Path filePath = root.resolve(newFilename);
 
         try {
             // 디렉터리 존재 여부 확인 및 생성
@@ -42,7 +48,7 @@ public class DocumentServiceImpl implements DocumentService{
             Files.copy(file.getInputStream(), filePath);
             // 파일 메타데이터 DB에 저장
             Document document = new Document(
-                    fileName,
+                    newFilename,
                     formatFileSize(file.getSize()),
                     uploadUser,
                     filePath.toString(),
@@ -51,7 +57,7 @@ public class DocumentServiceImpl implements DocumentService{
             documentRepository.save(document);
             documentKeyRepository.save(DocumentKey.createDocumentKey(document));
         } catch (IOException e) {
-            throw new IOException("Failed to upload file: " + e.getMessage(), e);
+            throw new Exception500("파일 업로드에 실패했습니다.");
         }
     }
 
