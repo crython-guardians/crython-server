@@ -1,14 +1,15 @@
 package crypton.CryptoGuardians.domain.document.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.sql.Timestamp;
 
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "document")
 public class Document {
@@ -34,7 +35,11 @@ public class Document {
     private boolean fileTheft;
 
     @Column
-    private String uploadDay;
+    private int fileReadCount;
+
+    @Column(updatable = false)
+    @CreationTimestamp
+    private Timestamp createdAt;
 
     public Document(String fileName, String fileSize, String uploadUser, String filePath, boolean fileTheft){
         this.fileName = fileName;
@@ -42,6 +47,9 @@ public class Document {
         this.uploadUser = uploadUser;
         this.filePath = filePath;
         this.fileTheft = fileTheft;
-        this.uploadDay = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    public void fileRead() {
+        this.fileReadCount++;
     }
 }

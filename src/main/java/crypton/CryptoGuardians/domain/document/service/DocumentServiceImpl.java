@@ -1,6 +1,6 @@
 package crypton.CryptoGuardians.domain.document.service;
 
-import crypton.CryptoGuardians.domain.document.dto.DocRequestDTO;
+import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
 import crypton.CryptoGuardians.domain.document.entity.Document;
 import crypton.CryptoGuardians.domain.document.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +23,9 @@ public class DocumentServiceImpl implements DocumentService{
     private final Path root = Paths.get("uploads");
 
     @Override
-    public void saveFile(DocRequestDTO docRequestDTO) throws IOException {
-        MultipartFile file = docRequestDTO.getFile();
-        String uploadUser = docRequestDTO.getUploadUser();
+    public void saveFile(UploadRequestDTO uploadRequestDTO) throws IOException {
+        MultipartFile file = uploadRequestDTO.file();
+        String uploadUser = uploadRequestDTO.uploadUser();
         String fileName = file.getOriginalFilename();
         Path filePath = root.resolve(fileName);
 
