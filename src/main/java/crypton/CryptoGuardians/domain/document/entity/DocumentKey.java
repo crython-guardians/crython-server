@@ -20,12 +20,12 @@ public class DocumentKey {
     @JoinColumn(name = "document_id")
     private Document document;
 
-    private String key;
+    private String authKey;
 
     public static DocumentKey createDocumentKey(Document document){
         DocumentKey documentKey = new DocumentKey();
         documentKey.document = document;
-        documentKey.key = UUID.randomUUID().toString();
+        documentKey.authKey = UUID.randomUUID().toString();
         return documentKey;
     }
 }
