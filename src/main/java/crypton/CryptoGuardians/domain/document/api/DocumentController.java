@@ -1,11 +1,13 @@
 package crypton.CryptoGuardians.domain.document.api;
 
 import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
+import crypton.CryptoGuardians.domain.document.dto.ViewLogRequestDTO;
 import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
 import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
 import crypton.CryptoGuardians.domain.document.service.DocumentService;
 import crypton.CryptoGuardians.global.util.ResponseUtil;
 import crypton.CryptoGuardians.global.util.ResponseUtil.ResponseDto;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -58,5 +60,14 @@ public class DocumentController {
     ){
         AuthorizeResponseDTO response = documentService.getAuthorizeKey(documentId);
         return new ResponseEntity<>(ResponseUtil.success("파일 열람 인증 성공", response), HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/view-log")
+    public ResponseEntity<ResponseDto<String>> viewLog(
+            @PathVariable("id") @NotNull @Min(1) Long documentId,
+            @RequestBody @Valid ViewLogRequestDTO viewLogRequestDTO
+    ){
+        documentService.saveViewLog(documentId, viewLogRequestDTO);
+        return new ResponseEntity<>(ResponseUtil.success("파일 열람 로그 저장 성공", null), HttpStatus.OK);
     }
 }
