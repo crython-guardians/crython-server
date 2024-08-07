@@ -49,6 +49,7 @@ public class DocumentServiceImpl implements DocumentService{
                     false
             );
             documentRepository.save(document);
+            documentKeyRepository.save(DocumentKey.createDocumentKey(document));
         } catch (IOException e) {
             throw new IOException("Failed to upload file: " + e.getMessage(), e);
         }
