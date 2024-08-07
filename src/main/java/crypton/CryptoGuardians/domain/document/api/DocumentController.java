@@ -6,6 +6,7 @@ import crypton.CryptoGuardians.domain.document.service.DocumentService;
 import crypton.CryptoGuardians.global.util.ResponseUtil;
 import crypton.CryptoGuardians.global.util.ResponseUtil.ResponseDto;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ public class DocumentController {
 
     @GetMapping("/{id}/authorize")
     public ResponseEntity<ResponseDto<AuthorizeResponseDTO>> authorize(
-            @PathVariable("id") @Min(1) Long documentId
+            @PathVariable("id") @NotNull @Min(1) Long documentId
     ){
         AuthorizeResponseDTO response = documentService.getAuthorizeKey(documentId);
         return new ResponseEntity<>(ResponseUtil.success("파일 열람 인증 성공", response), HttpStatus.OK);
