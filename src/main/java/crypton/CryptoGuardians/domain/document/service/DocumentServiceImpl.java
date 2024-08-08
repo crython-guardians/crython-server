@@ -2,6 +2,7 @@ package crypton.CryptoGuardians.domain.document.service;
 
 import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
+import crypton.CryptoGuardians.domain.document.dto.ReportResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
 import crypton.CryptoGuardians.domain.document.dto.ViewLogRequestDTO;
 import crypton.CryptoGuardians.domain.document.entity.Document;
@@ -27,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 @Transactional
@@ -121,6 +123,13 @@ public class DocumentServiceImpl implements DocumentService {
         DocumentKey documentKey = documentKeyRepository.findByDocumentId(documentId).orElseThrow(() -> new Exception404("파일 인증 키를 찾을 수 없습니다."));
         String key = documentKey.getAuthKey();
         return new AuthorizeResponseDTO(key);
+    }
+
+    @Override
+    public ReportResponseDTO getReport(Long documentId) {
+        Document document = documentRepository.findById(documentId).orElseThrow(() -> new Exception404("파일을 찾을 수 없습니다."));
+        List<DocumentView> documentViews = documentViewRepository.findAllByDocumentId(documentId);
+        return ReportResponseDTO.from(document, documentViews);
     }
 
     @Override
