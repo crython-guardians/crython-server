@@ -5,8 +5,10 @@ import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
 import crypton.CryptoGuardians.domain.document.entity.Document;
 import crypton.CryptoGuardians.domain.document.entity.DocumentKey;
+import crypton.CryptoGuardians.domain.document.entity.User;
 import crypton.CryptoGuardians.domain.document.repository.DocumentKeyRepository;
 import crypton.CryptoGuardians.domain.document.repository.DocumentRepository;
+import crypton.CryptoGuardians.domain.document.repository.UserRepository;
 import crypton.CryptoGuardians.global.error.exception.Exception404;
 import crypton.CryptoGuardians.global.error.exception.Exception500;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +31,15 @@ import java.util.UUID;
 public class DocumentServiceImpl implements DocumentService{
 
     private final DocumentRepository documentRepository;
+    private final UserRepository userRepository;
     private final DocumentKeyRepository documentKeyRepository;
     private final Path root = Paths.get("uploads");
 
     @Override
     public void saveFile(UploadRequestDTO uploadRequestDTO) {
         MultipartFile file = uploadRequestDTO.file();
-        String uploadUser = uploadRequestDTO.uploadUser();
+        Long userId = uploadRequestDTO.uploadUserId();
+        User uploadUser = userRepository.findById(userId).orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
         String originalFilename = file.getOriginalFilename();
 
         // 파일명 앞에 UUID 추가
@@ -73,7 +77,7 @@ public class DocumentServiceImpl implements DocumentService{
 
     @Override
     public DownloadResponseDTO loadFileAsResource(Long documentId) {
-        Document document = documentRepository.findById(documentId).orElseThrow(() -> new Exception404("파일을 찾을 수 없습니다."));
+        Document document = findById(documentId);
 
         try {
             Path filePath = Paths.get(document.getFilePath()).toAbsolutePath().normalize();
@@ -88,6 +92,28 @@ public class DocumentServiceImpl implements DocumentService{
         } catch (Exception e) {
             throw new Exception404("파일을 찾을 수 없습니다.");
         }
+    }
+
+    @Override
+    public void deleteFile(Long documentId) {
+        Document document = findById(documentId);
+
+        try {
+            Path filePath = Paths.get(document.getFilePath()).toAbsolutePath().normalize();
+            // 실제 파일 삭제
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+            }
+            // DB에서 파일 메타 데이터 삭제
+            documentRepository.deleteById(documentId);
+        } catch (IOException e) {
+            throw new Exception500("파일 삭제에 실패했습니다.");
+        }
+    }
+
+    @Override
+    public Document findById(Long documentId) {
+        return documentRepository.findById(documentId).orElseThrow(() -> new Exception404("파일을 찾을 수 없습니다."));
     }
 
     private String formatFileSize(long size) {
