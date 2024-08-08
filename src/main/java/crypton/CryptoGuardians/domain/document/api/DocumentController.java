@@ -1,6 +1,7 @@
 package crypton.CryptoGuardians.domain.document.api;
 
 import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
+import crypton.CryptoGuardians.domain.document.dto.ReportResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.ViewLogRequestDTO;
 import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
 import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
@@ -60,6 +61,14 @@ public class DocumentController {
     ){
         AuthorizeResponseDTO response = documentService.getAuthorizeKey(documentId);
         return new ResponseEntity<>(ResponseUtil.success("파일 열람 인증 성공", response), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/report")
+    public ResponseEntity<ResponseDto<ReportResponseDTO>> report(
+            @PathVariable("id") @NotNull @Min(1) Long documentId
+    ){
+        ReportResponseDTO reportResponseDTO = documentService.getReport(documentId);
+        return new ResponseEntity<>(ResponseUtil.success("파일 리포트 조회 성공", reportResponseDTO), HttpStatus.OK);
     }
 
     @PostMapping("/{id}/view-log")
