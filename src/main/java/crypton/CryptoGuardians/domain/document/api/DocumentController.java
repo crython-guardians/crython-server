@@ -3,7 +3,6 @@ package crypton.CryptoGuardians.domain.document.api;
 import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
 import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
-import crypton.CryptoGuardians.domain.document.entity.Document;
 import crypton.CryptoGuardians.domain.document.service.DocumentService;
 import crypton.CryptoGuardians.global.util.ResponseUtil;
 import crypton.CryptoGuardians.global.util.ResponseUtil.ResponseDto;
@@ -45,6 +44,13 @@ public class DocumentController {
                 .body(resource);
     }
 
+    @DeleteMapping("/{id}/delete")
+    public ResponseEntity<ResponseDto<String>> deleteFile(
+            @PathVariable("id") @NotNull @Min(1) Long documentId
+    ) {
+        documentService.deleteFile(documentId);
+        return new ResponseEntity<>(ResponseUtil.success("파일 삭제 성공", null), HttpStatus.OK);
+    }
 
     @GetMapping("/{id}/authorize")
     public ResponseEntity<ResponseDto<AuthorizeResponseDTO>> authorize(

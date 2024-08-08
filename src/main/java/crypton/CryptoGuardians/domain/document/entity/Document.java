@@ -24,8 +24,9 @@ public class Document {
     @Column
     private String fileSize;
 
-    @Column
-    private String uploadUser;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User uploadUser;
 
     @Column
     private String filePath;
@@ -45,7 +46,11 @@ public class Document {
     @CreationTimestamp
     private Timestamp createdAt;
 
-    public Document(String fileName, String fileSize, String uploadUser, String filePath, boolean updateAuthKey){
+    @OneToOne(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DocumentKey documentKey;
+
+    public Document(String fileName, String fileSize, User uploadUser, String filePath, boolean updateAuthKey) {
+
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.uploadUser = uploadUser;
