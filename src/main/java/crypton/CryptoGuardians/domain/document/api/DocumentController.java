@@ -1,14 +1,19 @@
 package crypton.CryptoGuardians.domain.document.api;
 
+import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
 import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
+import crypton.CryptoGuardians.domain.document.entity.Document;
 import crypton.CryptoGuardians.domain.document.service.DocumentService;
 import crypton.CryptoGuardians.global.util.ResponseUtil;
 import crypton.CryptoGuardians.global.util.ResponseUtil.ResponseDto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +31,20 @@ public class DocumentController {
             documentService.saveFile(uploadRequestDTO);
             return new ResponseEntity<>(ResponseUtil.success("파일 업로드 성공", null), HttpStatus.OK);
     }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<Resource> downloadFile(
+            @PathVariable("id") @NotNull @Min(1) Long documentId
+    ) {
+        DownloadResponseDTO downloadResponseDTO = documentService.loadFileAsResource(documentId);
+        Resource resource = downloadResponseDTO.resource();
+        String fileName = downloadResponseDTO.fileName();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .body(resource);
+    }
+
 
     @GetMapping("/{id}/authorize")
     public ResponseEntity<ResponseDto<AuthorizeResponseDTO>> authorize(

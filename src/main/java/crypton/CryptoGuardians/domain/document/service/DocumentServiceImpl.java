@@ -1,6 +1,7 @@
 package crypton.CryptoGuardians.domain.document.service;
 
 import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
+import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
 import crypton.CryptoGuardians.domain.document.entity.Document;
 import crypton.CryptoGuardians.domain.document.entity.DocumentKey;
@@ -9,6 +10,8 @@ import crypton.CryptoGuardians.domain.document.repository.DocumentRepository;
 import crypton.CryptoGuardians.global.error.exception.Exception404;
 import crypton.CryptoGuardians.global.error.exception.Exception500;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,6 +64,32 @@ public class DocumentServiceImpl implements DocumentService{
         }
     }
 
+    @Override
+    public AuthorizeResponseDTO getAuthorizeKey(Long documentId) {
+        DocumentKey documentKey = documentKeyRepository.findByDocumentId(documentId).orElseThrow(() -> new Exception404("파일 인증 키를 찾을 수 없습니다."));
+        String key = documentKey.getAuthKey();
+        return new AuthorizeResponseDTO(key);
+    }
+
+    @Override
+    public DownloadResponseDTO loadFileAsResource(Long documentId) {
+        Document document = documentRepository.findById(documentId).orElseThrow(() -> new Exception404("파일을 찾을 수 없습니다."));
+
+        try {
+            Path filePath = Paths.get(document.getFilePath()).toAbsolutePath().normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists()) {
+                // 파일명에서 UUID 부분 슬라이싱
+                String originalFileName = document.getFileName().substring(document.getFileName().indexOf("_") + 1);
+                return new DownloadResponseDTO(originalFileName, resource);
+            } else {
+                throw new Exception404("파일을 찾을 수 없습니다.");
+            }
+        } catch (Exception e) {
+            throw new Exception404("파일을 찾을 수 없습니다.");
+        }
+    }
+
     private String formatFileSize(long size) {
         if (size <= 0) return "0 KB";
         if (size < 1024) return "1 KB";
@@ -81,12 +110,5 @@ public class DocumentServiceImpl implements DocumentService{
         // 소수점 둘째자리까지 반올림
         DecimalFormat df = new DecimalFormat("#,##0.##");
         return df.format(adjustedSize) + " " + units[unitIndex];
-    }
-
-    @Override
-    public AuthorizeResponseDTO getAuthorizeKey(Long documentId) {
-        DocumentKey documentKey = documentKeyRepository.findByDocumentId(documentId).orElseThrow(() -> new Exception404("파일 인증 키를 찾을 수 없습니다."));
-        String key = documentKey.getAuthKey();
-        return new AuthorizeResponseDTO(key);
     }
 }
