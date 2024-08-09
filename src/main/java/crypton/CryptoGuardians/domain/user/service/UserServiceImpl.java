@@ -4,7 +4,6 @@ import crypton.CryptoGuardians.domain.user.entity.User;
 import crypton.CryptoGuardians.domain.user.exception.UserAlreadyExistsException;
 import crypton.CryptoGuardians.domain.user.exception.UserNotFoundException;
 import crypton.CryptoGuardians.domain.user.repository.UserRepository;
-//import crypton.CryptoGuardians.domain.user.repository.UserRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +20,10 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User register(String username, String password) {
-        if (userRepository.findByUsername(username).isPresent()) {
+        if (userRepository.existsByUsername(username)) {
             throw new UserAlreadyExistsException("Username already exists");
         }
-        User user = new User();
-        System.out.println(username + password);
-        user.setUsername(username);
-        user.setPassword(password);
+        User user = new User(username, password);
         userRepository.save(user);
         return user;
     }
