@@ -1,5 +1,6 @@
 package crypton.CryptoGuardians.domain.document.api;
 
+import crypton.CryptoGuardians.domain.document.dto.DocumentResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.ReportResponseDTO;
 import crypton.CryptoGuardians.domain.document.dto.ViewLogRequestDTO;
@@ -20,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Validated
@@ -27,6 +30,14 @@ import org.springframework.web.bind.annotation.*;
 public class DocumentController {
 
     private final DocumentService documentService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseDto<List<DocumentResponseDTO>>> getFilesByUser(
+            @PathVariable("id") @NotNull @Min(1) Long userId
+    ) {
+        List<DocumentResponseDTO> documents = documentService.getFilesByUser(userId);
+        return new ResponseEntity<>(ResponseUtil.success("파일 리스트 조회 성공", documents), HttpStatus.OK);
+    }
 
     @PostMapping("/upload")
     public ResponseEntity<ResponseDto<String>> uploadFile(@ModelAttribute UploadRequestDTO uploadRequestDTO){

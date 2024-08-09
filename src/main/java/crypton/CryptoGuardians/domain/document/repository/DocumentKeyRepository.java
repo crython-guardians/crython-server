@@ -9,5 +9,4 @@ import java.util.Optional;
 
 @Repository
 public interface DocumentKeyRepository extends JpaRepository<DocumentKey, Long> {
-    Optional<DocumentKey> findByDocumentId(Long id);
 }
