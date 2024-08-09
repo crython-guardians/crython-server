@@ -1,10 +1,6 @@
 package crypton.CryptoGuardians.domain.document.service;
 
-import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
-import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
-import crypton.CryptoGuardians.domain.document.dto.ReportResponseDTO;
-import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
-import crypton.CryptoGuardians.domain.document.dto.ViewLogRequestDTO;
+import crypton.CryptoGuardians.domain.document.dto.*;
 import crypton.CryptoGuardians.domain.document.entity.Document;
 import crypton.CryptoGuardians.domain.document.entity.DocumentKey;
 import crypton.CryptoGuardians.domain.document.entity.DocumentView;
@@ -27,19 +23,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class DocumentServiceImpl implements DocumentService {
+public class DocumentServiceImpl implements DocumentService{
 
     private final DocumentRepository documentRepository;
     private final UserRepository userRepository;
     private final DocumentKeyRepository documentKeyRepository;
-    private final DocumentViewRepository documentViewRepository;
     private final Path root = Paths.get("uploads");
+    private final DocumentViewRepository documentViewRepository;
 
     @Override
     public void saveFile(UploadRequestDTO uploadRequestDTO) {
@@ -111,6 +108,27 @@ public class DocumentServiceImpl implements DocumentService {
         } catch (IOException e) {
             throw new Exception500("파일 삭제에 실패했습니다.");
         }
+    }
+
+    @Override
+    public List<DocumentResponseDTO> getFilesByUser(Long userId) {
+
+        if (!userRepository.existsById(userId)) {
+            throw new Exception404("유저를 찾을 수 없습니다.");
+        }
+
+        List<Document> documents = documentRepository.findByUploadUserIdOrderByCreatedAtAsc(userId);
+        return documents.stream()
+                .map(document -> new DocumentResponseDTO(
+                        document.getFileName().substring(document.getFileName().indexOf("_") + 1),
+                        document.getFileReadCount(),
+                        document.getFileSize(),
+                        document.getFileTheftCount(),
+                        document.isUpdateAuthKey(),
+                        document.getCreatedAt(),
+                        document.getUploadUser().getUserName()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
