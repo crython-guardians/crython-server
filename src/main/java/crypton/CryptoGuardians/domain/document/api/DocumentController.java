@@ -31,9 +31,9 @@ public class DocumentController {
 
     private final DocumentService documentService;
 
-    @GetMapping("/{id}")
+    @GetMapping("/list")
     public ResponseEntity<ResponseDto<List<DocumentResponseDTO>>> getFilesByUser(
-            @PathVariable("id") @NotNull @Min(1) Long userId
+            @RequestParam(value = "userId") @NotNull @Min(1) Long userId
     ) {
         List<DocumentResponseDTO> documents = documentService.getFilesByUser(userId);
         return new ResponseEntity<>(ResponseUtil.success("파일 리스트 조회 성공", documents), HttpStatus.OK);
