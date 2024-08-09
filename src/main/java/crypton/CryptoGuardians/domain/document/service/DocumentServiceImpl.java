@@ -65,8 +65,11 @@ public class DocumentServiceImpl implements DocumentService {
                     filePath.toString(),
                     false
             );
+
+            // documentKey 설정
+            document.setDocumentKey(DocumentKey.createDocumentKey());
+
             documentRepository.save(document);
-            documentKeyRepository.save(DocumentKey.createDocumentKey(document));
         } catch (IOException e) {
             throw new Exception500("파일 업로드에 실패했습니다.");
         }
