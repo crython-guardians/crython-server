@@ -16,15 +16,10 @@ public class DocumentKey {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id")
-    private Document document;
-
     private String authKey;
 
-    public static DocumentKey createDocumentKey(Document document){
+    public static DocumentKey createDocumentKey() {
         DocumentKey documentKey = new DocumentKey();
-        documentKey.document = document;
         documentKey.authKey = UUID.randomUUID().toString();
         return documentKey;
     }

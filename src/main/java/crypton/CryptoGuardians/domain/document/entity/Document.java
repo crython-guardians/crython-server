@@ -46,11 +46,11 @@ public class Document {
     @CreationTimestamp
     private Timestamp createdAt;
 
-    @OneToOne(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "document_key_id", referencedColumnName = "id")
     private DocumentKey documentKey;
 
     public Document(String fileName, String fileSize, User uploadUser, String filePath, boolean updateAuthKey) {
-
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.uploadUser = uploadUser;
@@ -64,5 +64,9 @@ public class Document {
 
     public void fileTheft() {
         this.fileTheftCount++;
+    }
+
+    public void setDocumentKey(DocumentKey documentKey) {
+        this.documentKey = documentKey;
     }
 }
