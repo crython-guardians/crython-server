@@ -20,7 +20,7 @@ public record ReportResponseDTO(
         boolean updateAuthKey = document.isUpdateAuthKey();
 
         List<ViewerDTO> viewers = documentViews.stream()
-                .map(view -> new ViewerDTO(view.getViewer().getId(), view.getViewer().getUserName(), view.getCreatedAt()))
+                .map(view -> new ViewerDTO(view.getViewer().getId(), view.getViewer().getUsername(), view.getCreatedAt()))
                 .sorted(Comparator.comparing(ViewerDTO::date).reversed())
                 .collect(Collectors.toList());
 

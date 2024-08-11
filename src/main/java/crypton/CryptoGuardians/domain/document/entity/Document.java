@@ -1,5 +1,6 @@
 package crypton.CryptoGuardians.domain.document.entity;
 
+import crypton.CryptoGuardians.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

@@ -4,11 +4,11 @@ import crypton.CryptoGuardians.domain.document.dto.*;
 import crypton.CryptoGuardians.domain.document.entity.Document;
 import crypton.CryptoGuardians.domain.document.entity.DocumentKey;
 import crypton.CryptoGuardians.domain.document.entity.DocumentView;
-import crypton.CryptoGuardians.domain.document.entity.User;
 import crypton.CryptoGuardians.domain.document.repository.DocumentKeyRepository;
 import crypton.CryptoGuardians.domain.document.repository.DocumentRepository;
 import crypton.CryptoGuardians.domain.document.repository.DocumentViewRepository;
-import crypton.CryptoGuardians.domain.document.repository.UserRepository;
+import crypton.CryptoGuardians.domain.user.entity.User;
+import crypton.CryptoGuardians.domain.user.repository.UserRepository;
 import crypton.CryptoGuardians.global.error.exception.Exception404;
 import crypton.CryptoGuardians.global.error.exception.Exception500;
 import lombok.RequiredArgsConstructor;
@@ -126,7 +126,7 @@ public class DocumentServiceImpl implements DocumentService{
                         document.getFileTheftCount(),
                         document.isUpdateAuthKey(),
                         document.getCreatedAt(),
-                        document.getUploadUser().getUserName()
+                        document.getUploadUser().getUsername()
                 ))
                 .collect(Collectors.toList());
     }
