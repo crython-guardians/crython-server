@@ -1,12 +1,7 @@
 package crypton.CryptoGuardians.domain.document.service;
 
-import crypton.CryptoGuardians.domain.document.dto.DocumentResponseDTO;
-import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
-import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
-import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
+import crypton.CryptoGuardians.domain.document.dto.*;
 import crypton.CryptoGuardians.domain.document.entity.Document;
-import crypton.CryptoGuardians.domain.document.dto.ViewLogRequestDTO;
-import crypton.CryptoGuardians.domain.document.dto.ReportResponseDTO;
 
 import java.util.List;
 
@@ -20,4 +15,5 @@ public interface DocumentService {
     AuthorizeResponseDTO getAuthorizeKey(Long documentId);
     ReportResponseDTO getReport(Long documentId);
     void saveViewLog(Long documentId, ViewLogRequestDTO viewLogRequestDTO);
+    void fileShare(Long documentId, DocShareRequestDTO shareRequestDTO);
 }

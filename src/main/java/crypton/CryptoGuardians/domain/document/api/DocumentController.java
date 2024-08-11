@@ -1,11 +1,6 @@
 package crypton.CryptoGuardians.domain.document.api;
 
-import crypton.CryptoGuardians.domain.document.dto.DocumentResponseDTO;
-import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
-import crypton.CryptoGuardians.domain.document.dto.ReportResponseDTO;
-import crypton.CryptoGuardians.domain.document.dto.ViewLogRequestDTO;
-import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
-import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
+import crypton.CryptoGuardians.domain.document.dto.*;
 import crypton.CryptoGuardians.domain.document.service.DocumentService;
 import crypton.CryptoGuardians.global.util.ResponseUtil;
 import crypton.CryptoGuardians.global.util.ResponseUtil.ResponseDto;
@@ -89,5 +84,14 @@ public class DocumentController {
     ){
         documentService.saveViewLog(documentId, viewLogRequestDTO);
         return new ResponseEntity<>(ResponseUtil.success("파일 열람 로그 저장 성공", null), HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/share")
+    public ResponseEntity<ResponseDto<String>> fileShare(
+            @PathVariable("id") @NotNull @Min(1) Long documentId,
+            @RequestBody @Valid DocShareRequestDTO shareRequestDTO
+    ) {
+        documentService.fileShare(documentId, shareRequestDTO);
+        return new ResponseEntity<>(ResponseUtil.success("파일 공유 성공", null), HttpStatus.OK);
     }
 }

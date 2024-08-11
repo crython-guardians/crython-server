@@ -3,9 +3,11 @@ package crypton.CryptoGuardians.domain.document.service;
 import crypton.CryptoGuardians.domain.document.dto.*;
 import crypton.CryptoGuardians.domain.document.entity.Document;
 import crypton.CryptoGuardians.domain.document.entity.DocumentKey;
+import crypton.CryptoGuardians.domain.document.entity.DocumentShare;
 import crypton.CryptoGuardians.domain.document.entity.DocumentView;
 import crypton.CryptoGuardians.domain.document.repository.DocumentKeyRepository;
 import crypton.CryptoGuardians.domain.document.repository.DocumentRepository;
+import crypton.CryptoGuardians.domain.document.repository.DocumentShareRepository;
 import crypton.CryptoGuardians.domain.document.repository.DocumentViewRepository;
 import crypton.CryptoGuardians.domain.user.entity.User;
 import crypton.CryptoGuardians.domain.user.repository.UserRepository;
@@ -37,6 +39,7 @@ public class DocumentServiceImpl implements DocumentService{
     private final DocumentKeyRepository documentKeyRepository;
     private final Path root = Paths.get("uploads");
     private final DocumentViewRepository documentViewRepository;
+    private final DocumentShareRepository documentShareRepository;
 
     @Override
     public void saveFile(UploadRequestDTO uploadRequestDTO) {
@@ -132,26 +135,21 @@ public class DocumentServiceImpl implements DocumentService{
     }
 
     @Override
-    public Document findById(Long documentId) {
-        return documentRepository.findById(documentId).orElseThrow(() -> new Exception404("파일을 찾을 수 없습니다."));
-    }
-
-    @Override
     public AuthorizeResponseDTO getAuthorizeKey(Long documentId) {
-        Document document = documentRepository.findById(documentId).orElseThrow(() -> new Exception404("파일을 찾을 수 없습니다."));
+        Document document = findById(documentId);
         return new AuthorizeResponseDTO(document.getDocumentKey().getAuthKey());
     }
 
     @Override
     public ReportResponseDTO getReport(Long documentId) {
-        Document document = documentRepository.findById(documentId).orElseThrow(() -> new Exception404("파일을 찾을 수 없습니다."));
+        Document document = findById(documentId);
         List<DocumentView> documentViews = documentViewRepository.findAllByDocumentId(documentId);
         return ReportResponseDTO.from(document, documentViews);
     }
 
     @Override
     public void saveViewLog(Long documentId, ViewLogRequestDTO viewLogRequestDTO) {
-        Document document = documentRepository.findById(documentId).orElseThrow(() -> new Exception404("파일을 찾을 수 없습니다."));
+        Document document = findById(documentId);
         User viewer = userRepository.findById(viewLogRequestDTO.viewerId()).orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다."));
 
         document.fileRead();
@@ -159,6 +157,21 @@ public class DocumentServiceImpl implements DocumentService{
 
         DocumentView documentView = DocumentView.createDocumentView(document, viewer, viewLogRequestDTO.timestamp());
         documentViewRepository.save(documentView);
+    }
+
+    @Override
+    public void fileShare(Long documentId, DocShareRequestDTO shareRequestDTO) {
+        Document document = findById(documentId);
+        Long sharedUserId = userRepository.findByUsername(shareRequestDTO.sharedUser()).orElseThrow(()
+                -> new Exception404("유저를 찾을 수 없습니다")).getId();
+
+        DocumentShare documentShare = new DocumentShare(sharedUserId, document);
+        documentShareRepository.save(documentShare);
+    }
+
+    @Override
+    public Document findById(Long documentId) {
+        return documentRepository.findById(documentId).orElseThrow(() -> new Exception404("파일을 찾을 수 없습니다."));
     }
 
     private String formatFileSize(long size) {
