@@ -1,11 +1,6 @@
 package crypton.CryptoGuardians.domain.document.api;
 
-import crypton.CryptoGuardians.domain.document.dto.DocumentResponseDTO;
-import crypton.CryptoGuardians.domain.document.dto.DownloadResponseDTO;
-import crypton.CryptoGuardians.domain.document.dto.ReportResponseDTO;
-import crypton.CryptoGuardians.domain.document.dto.ViewLogRequestDTO;
-import crypton.CryptoGuardians.domain.document.dto.UploadRequestDTO;
-import crypton.CryptoGuardians.domain.document.dto.AuthorizeResponseDTO;
+import crypton.CryptoGuardians.domain.document.dto.*;
 import crypton.CryptoGuardians.domain.document.service.DocumentService;
 import crypton.CryptoGuardians.global.util.ResponseUtil;
 import crypton.CryptoGuardians.global.util.ResponseUtil.ResponseDto;
@@ -39,10 +34,19 @@ public class DocumentController {
         return new ResponseEntity<>(ResponseUtil.success("파일 리스트 조회 성공", documents), HttpStatus.OK);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<ResponseDto<List<DocumentResponseDTO>>> getFilesByUserAndKeyword(
+            @RequestParam(value = "userId") @NotNull @Min(1) Long userId,
+            @RequestParam(value = "keyword") String keyword
+    ) {
+        List<DocumentResponseDTO> documents = documentService.getFilesByUserAndKeyword(userId, keyword);
+        return new ResponseEntity<>(ResponseUtil.success("파일 검색 성공", documents), HttpStatus.OK);
+    }
+
     @PostMapping("/upload")
-    public ResponseEntity<ResponseDto<String>> uploadFile(@ModelAttribute UploadRequestDTO uploadRequestDTO){
-            documentService.saveFile(uploadRequestDTO);
-            return new ResponseEntity<>(ResponseUtil.success("파일 업로드 성공", null), HttpStatus.OK);
+    public ResponseEntity<ResponseDto<String>> uploadFile(@ModelAttribute UploadRequestDTO uploadRequestDTO) {
+        documentService.saveFile(uploadRequestDTO);
+        return new ResponseEntity<>(ResponseUtil.success("파일 업로드 성공", null), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/download")
@@ -69,7 +73,7 @@ public class DocumentController {
     @GetMapping("/{id}/authorize")
     public ResponseEntity<ResponseDto<AuthorizeResponseDTO>> authorize(
             @PathVariable("id") @NotNull @Min(1) Long documentId
-    ){
+    ) {
         AuthorizeResponseDTO response = documentService.getAuthorizeKey(documentId);
         return new ResponseEntity<>(ResponseUtil.success("파일 열람 인증 성공", response), HttpStatus.OK);
     }
@@ -77,7 +81,7 @@ public class DocumentController {
     @GetMapping("/{id}/report")
     public ResponseEntity<ResponseDto<ReportResponseDTO>> report(
             @PathVariable("id") @NotNull @Min(1) Long documentId
-    ){
+    ) {
         ReportResponseDTO reportResponseDTO = documentService.getReport(documentId);
         return new ResponseEntity<>(ResponseUtil.success("파일 리포트 조회 성공", reportResponseDTO), HttpStatus.OK);
     }
@@ -86,7 +90,7 @@ public class DocumentController {
     public ResponseEntity<ResponseDto<String>> viewLog(
             @PathVariable("id") @NotNull @Min(1) Long documentId,
             @RequestBody @Valid ViewLogRequestDTO viewLogRequestDTO
-    ){
+    ) {
         documentService.saveViewLog(documentId, viewLogRequestDTO);
         return new ResponseEntity<>(ResponseUtil.success("파일 열람 로그 저장 성공", null), HttpStatus.OK);
     }
