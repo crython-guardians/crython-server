@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class DocumentServiceImpl implements DocumentService{
+public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRepository documentRepository;
     private final UserRepository userRepository;
@@ -119,15 +119,19 @@ public class DocumentServiceImpl implements DocumentService{
 
         List<Document> documents = documentRepository.findByUploadUserIdOrderByCreatedAtAsc(userId);
         return documents.stream()
-                .map(document -> new DocumentResponseDTO(
-                        document.getFileName().substring(document.getFileName().indexOf("_") + 1),
-                        document.getFileReadCount(),
-                        document.getFileSize(),
-                        document.getFileTheftCount(),
-                        document.isUpdateAuthKey(),
-                        document.getCreatedAt(),
-                        document.getUploadUser().getUserName()
-                ))
+                .map(DocumentResponseDTO::from)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DocumentResponseDTO> getFilesByUserAndKeyword(Long userId, String keyword) {
+        if (!userRepository.existsById(userId)) {
+            throw new Exception404("유저를 찾을 수 없습니다.");
+        }
+
+        List<Document> documents = documentRepository.searchDocumentOrderByCreatedAtAsc(userId, keyword);
+        return documents.stream()
+                .map(DocumentResponseDTO::from)
                 .collect(Collectors.toList());
     }
 
