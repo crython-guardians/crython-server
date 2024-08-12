@@ -27,3 +27,14 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  # GCS(Google Cloud Storage)
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: my-project-1558663198607-36efb3acc2c6.json
+
+gcs:
+  bucket:
+    name: crython-file-storage
