@@ -2,6 +2,7 @@ package crypton.CryptoGuardians.domain.user.api;
 
 
 import crypton.CryptoGuardians.domain.user.dto.UserRequestDto;
+import crypton.CryptoGuardians.domain.user.dto.UserResponseDTO;
 import crypton.CryptoGuardians.domain.user.entity.User;
 import crypton.CryptoGuardians.domain.user.service.UserService;
 import crypton.CryptoGuardians.global.util.ResponseUtil;
@@ -18,13 +19,10 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<ResponseDto<String>> register(@RequestBody UserRequestDto userRequestDto) {
-        try {
-            User user = userService.register(userRequestDto.username(), userRequestDto.password());
-            return new ResponseEntity<>(ResponseUtil.success("회원가입 성공", user.getUsername()), HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(ResponseUtil.failure("회원가입 실패", e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<ResponseDto<UserResponseDTO>> register(@RequestBody UserRequestDto userRequestDto) {
+        User user = userService.register(userRequestDto.username(), userRequestDto.password());
+        UserResponseDTO responseDTO = new UserResponseDTO(user.getId(), user.getUsername());
+        return new ResponseEntity<>(ResponseUtil.success("회원가입 성공", responseDTO), HttpStatus.OK);
     }
 
     @PostMapping("/login")
