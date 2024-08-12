@@ -2,6 +2,8 @@ package crypton.CryptoGuardians.domain.document.service;
 
 import crypton.CryptoGuardians.domain.document.dto.*;
 import crypton.CryptoGuardians.domain.document.entity.Document;
+import crypton.CryptoGuardians.domain.document.dto.ViewLogRequestDTO;
+import crypton.CryptoGuardians.domain.document.dto.ReportResponseDTO;
 
 import java.util.List;
 
@@ -26,4 +28,5 @@ public interface DocumentService {
     void saveViewLog(Long documentId, ViewLogRequestDTO viewLogRequestDTO);
 
     void fileShare(Long documentId, DocShareRequestDTO shareRequestDTO);
+
 }
