@@ -1,5 +1,9 @@
 package crypton.CryptoGuardians.domain.document.service;
 
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
 import crypton.CryptoGuardians.domain.document.dto.*;
 import crypton.CryptoGuardians.domain.document.entity.Document;
 import crypton.CryptoGuardians.domain.document.entity.DocumentKey;
@@ -14,16 +18,14 @@ import crypton.CryptoGuardians.domain.user.repository.UserRepository;
 import crypton.CryptoGuardians.global.error.exception.Exception404;
 import crypton.CryptoGuardians.global.error.exception.Exception500;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.UUID;
@@ -37,9 +39,12 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
     private final UserRepository userRepository;
     private final DocumentKeyRepository documentKeyRepository;
-    private final Path root = Paths.get("uploads");
     private final DocumentViewRepository documentViewRepository;
     private final DocumentShareRepository documentShareRepository;
+    private final Storage storage;
+
+    @Value("${gcs.bucket.name}")
+    private String bucketName;
 
     @Override
     public void saveFile(UploadRequestDTO uploadRequestDTO) {
@@ -51,20 +56,17 @@ public class DocumentServiceImpl implements DocumentService {
         // 파일명 앞에 UUID 추가
         String uuid = UUID.randomUUID().toString();
         String newFilename = uuid + "_" + originalFilename;
-        Path filePath = root.resolve(newFilename);
 
         try {
-            // 디렉터리 존재 여부 확인 및 생성
-            Files.createDirectories(root);
+            BlobId blobId = BlobId.of(bucketName, newFilename);
+            BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getContentType()).build();
+            storage.create(blobInfo, file.getBytes());
 
-            // 실제 파일 디스크에 저장
-            Files.copy(file.getInputStream(), filePath);
             // 파일 메타데이터 DB에 저장
             Document document = new Document(
                     newFilename,
                     formatFileSize(file.getSize()),
                     uploadUser,
-                    filePath.toString(),
                     false
             );
 
@@ -82,15 +84,17 @@ public class DocumentServiceImpl implements DocumentService {
         Document document = findById(documentId);
 
         try {
-            Path filePath = Paths.get(document.getFilePath()).toAbsolutePath().normalize();
-            Resource resource = new UrlResource(filePath.toUri());
-            if (resource.exists()) {
-                // 파일명에서 UUID 부분 슬라이싱
-                String originalFileName = document.getFileName().substring(document.getFileName().indexOf("_") + 1);
-                return new DownloadResponseDTO(originalFileName, resource);
-            } else {
-                throw new Exception404("파일을 찾을 수 없습니다.");
+            Blob blob = storage.get(BlobId.of(bucketName, document.getFileName()));
+            if (blob == null) {
+                throw new Exception404("파일을 찾을 수 없습니다");
             }
+
+            byte[] content = blob.getContent();
+            // 파일명에서 UUID 부분 슬라이싱
+            String originalFileName = document.getFileName().substring(document.getFileName().indexOf("_") + 1);
+            Resource resource = new ByteArrayResource(content);
+
+            return new DownloadResponseDTO(originalFileName, resource);
         } catch (Exception e) {
             throw new Exception404("파일을 찾을 수 없습니다.");
         }
@@ -101,14 +105,10 @@ public class DocumentServiceImpl implements DocumentService {
         Document document = findById(documentId);
 
         try {
-            Path filePath = Paths.get(document.getFilePath()).toAbsolutePath().normalize();
-            // 실제 파일 삭제
-            if (Files.exists(filePath)) {
-                Files.delete(filePath);
-            }
+            storage.delete(BlobId.of(bucketName, document.getFileName()));
             // DB에서 파일 메타 데이터 삭제
             documentRepository.deleteById(documentId);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new Exception500("파일 삭제에 실패했습니다.");
         }
     }

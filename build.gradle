@@ -34,6 +34,10 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+	// GCS(Google Cloud Storage)
+	implementation 'org.springframework.cloud:spring-cloud-gcp-starter-storage:1.2.8.RELEASE'
+	implementation 'com.google.cloud:google-cloud-storage:2.22.2'
 }
 
 tasks.named('test') {

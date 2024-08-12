@@ -29,9 +29,6 @@ public class Document {
     @JoinColumn(name = "user_id")
     private User uploadUser;
 
-    @Column
-    private String filePath;
-
     // 문서 탈취 여부
     @Column
     private int fileTheftCount;
@@ -51,11 +48,10 @@ public class Document {
     @JoinColumn(name = "document_key_id", referencedColumnName = "id")
     private DocumentKey documentKey;
 
-    public Document(String fileName, String fileSize, User uploadUser, String filePath, boolean updateAuthKey) {
+    public Document(String fileName, String fileSize, User uploadUser, boolean updateAuthKey) {
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.uploadUser = uploadUser;
-        this.filePath = filePath;
         this.updateAuthKey = updateAuthKey;
     }
 
