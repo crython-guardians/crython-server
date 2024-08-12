@@ -21,7 +21,7 @@ public record DocumentResponseDTO(
                 document.getFileTheftCount(),
                 document.isUpdateAuthKey(),
                 document.getCreatedAt(),
-                document.getUploadUser().getUserName()
+                document.getUploadUser().getUsername()
         );
     }
 }
