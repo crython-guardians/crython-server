@@ -5,6 +5,7 @@ import crypton.CryptoGuardians.domain.document.entity.Document;
 import java.sql.Timestamp;
 
 public record DocumentResponseDTO(
+        Long documentId,
         String fileName,
         int fileReadCount,
         String fileSize,
@@ -15,6 +16,7 @@ public record DocumentResponseDTO(
 ) {
     public static DocumentResponseDTO from(Document document) {
         return new DocumentResponseDTO(
+                document.getId(),
                 document.getFileName().substring(document.getFileName().indexOf("_") + 1),
                 document.getFileReadCount(),
                 document.getFileSize(),
